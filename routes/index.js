@@ -3,35 +3,44 @@ const router = express.Router();
 const needle = require('needle');
 const apicache = require('apicache');
 
+const SERVER_URL = process.env.SERVER_URL;
+const HOST_NAME = process.env.HOST_NAME;
+const CACHE_DURATION = process.env.CACHE_DURATION;
+
 // Init cache
 let cache = apicache.middleware;
 
-router.get('/*', cache('10 minutes'), async (req, res) => {
+router.get('/*', cache(CACHE_DURATION), async (req, res) => {
   try {
     const { url, headers } = req;
-    headers.host = url.split('/')[0];
+    headers.host = HOST_NAME;
+
+    console.log('GET: ', url);
 
     const apiResponse = await needle(
       'get',
-      `https://${url.substring(1)}`,
+      `${SERVER_URL}${url}`,
       { headers }
     );
     const data = apiResponse.body;
 
     res.status(200).json(data);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error });
   }
 });
 
-router.post('/*', cache('10 minutes'), async (req, res) => {
+router.post('/*', cache(CACHE_DURATION), async (req, res) => {
   try {
     const { url, headers, body } = req;
-    headers.host = url.split('/')[0];
+    headers.host = HOST_NAME;
+
+    console.log('POST: ', url);
 
     const apiResponse = await needle(
       'post',
-      `https://${url.substring(1)}`,
+      `${SERVER_URL}${url}`,
       JSON.stringify(body),
       { headers }
     );
@@ -39,6 +48,29 @@ router.post('/*', cache('10 minutes'), async (req, res) => {
 
     res.status(200).json(data);
   } catch (error) {
+    console.error(error);
+    res.status(500).json({ error });
+  }
+});
+
+router.put('/*', cache(CACHE_DURATION), async (req, res) => {
+  try {
+    const { url, headers, body } = req;
+    headers.host = HOST_NAME;
+
+    console.log('PUT: ', url);
+
+    const apiResponse = await needle(
+      'put',
+      `${SERVER_URL}${url}`,
+      JSON.stringify(body),
+      { headers }
+    );
+    const data = apiResponse.body;
+
+    res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ error });
   }
 });

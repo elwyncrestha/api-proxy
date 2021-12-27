@@ -1,6 +1,11 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const dotenvExpand = require('dotenv-expand');
+
+// Env Vars
+const myEnv = dotenv.config();
+dotenvExpand(myEnv);
 
 const PORT = process.env.PORT || 5000;
 
